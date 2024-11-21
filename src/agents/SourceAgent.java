@@ -5,6 +5,8 @@ import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 
+
+
 public class SourceAgent extends Agent {
 
 
@@ -12,15 +14,16 @@ public class SourceAgent extends Agent {
 
     @Override
     protected void setup() {
-        System.out.println("Agent Renouvelable " + getLocalName() + " initialisé.");
 
+        System.out.println("Agent Renouvelable " + getLocalName() + " initialisé.");
+        //mise à jour d'état de l'agent chaque 1000ms
         addBehaviour(new TickerBehaviour(this, 1000) {
             @Override
             protected void onTick() {
                 //generation aléatoire d'une quantité d'energie
                 energieFournie = 75 + (int) (Math.random() * 51);
 
-                //message INFORM
+                //message INFORM pour l'agent UtilAgent
                 ACLMessage miseAJour = new ACLMessage(ACLMessage.INFORM);
 
                 miseAJour.addReceiver(new AID("UtilAgent", AID.ISLOCALNAME));

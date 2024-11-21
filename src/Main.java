@@ -50,7 +50,9 @@ public class Main {
 
 
 
-        } catch (StaleProxyException e) {
+        }
+
+        catch (StaleProxyException e) {
             e.printStackTrace();
         }
     }

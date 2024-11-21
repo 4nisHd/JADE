@@ -15,44 +15,50 @@ public class ConsumerAgent extends Agent {
 
     @Override
     protected void setup() {
-        energieDemandee = 25 + (int) (Math.random() * 51);
+        //demande aléatoire de l'énergie entre 25 et 70kwh
         Object[] args = getArguments();
+
         if (args != null && args.length > 0 && args[0] instanceof ConsumerGraph) {
             consumerGraph = (ConsumerGraph) args[0];
-        } else {
+        }
+
+        else {
             doDelete();
             return;
         }
 
         System.out.println("Agent " + getLocalName() + " initialisé");
 
-        addBehaviour(new TickerBehaviour(this, 1000) { // 1000 ms = 1 second
+        addBehaviour(new TickerBehaviour(this, 1000) {
             @Override
             protected void onTick() {
+                //demande aléatoire de l'énergie entre 25 et 70kwh
                 energieDemandee = 25 + (int) (Math.random() * 51);
 
-                //envoi REQUEST à UtilAgent
+                //envoi REQUEST à UtilAgent pour demander de lenergie
                 ACLMessage demande = new ACLMessage(ACLMessage.REQUEST);
                 demande.addReceiver(new AID("UtilAgent", AID.ISLOCALNAME));
                 demande.setContent("Demande de " + energieDemandee + " kWh");
                 send(demande);
                 System.out.println("Consommateur: " + getLocalName() + " demande " + energieDemandee + " kWh");
-
                 ACLMessage reponse = receive();
+
                 if (reponse != null) {
                     System.out.println(getLocalName() + " a reçu : " + reponse.getContent());
 
-                    int energieFournie = parseEnergyFromResponse(reponse.getContent());
+                    int energieFournie = parseEnergyResponse(reponse.getContent());
 
                     SwingUtilities.invokeLater(() -> consumerGraph.updateGraph(energieFournie));
-                } else {
+                }
+
+                else {
                     block(500);
                 }
             }
         });
     }
 
-    private int parseEnergyFromResponse(String content) {
+    private int parseEnergyResponse(String content) {
         try {
 
             if (content.startsWith("Allocation:")) {

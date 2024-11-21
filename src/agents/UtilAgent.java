@@ -1,12 +1,15 @@
 package agents;
+
+
 import gui.SupplyGraph;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
+
+
 
 public class UtilAgent extends Agent {
 
@@ -18,26 +21,31 @@ public class UtilAgent extends Agent {
     @Override
     protected void setup() {
         System.out.println("Agent utilitaire " + getLocalName() + " initialisé");
-
         SwingUtilities.invokeLater(() -> supplyGraph = new SupplyGraph());
 
+
         addBehaviour(new CyclicBehaviour() {
+
             @Override
             public void action() {
+
+
                 ACLMessage msg = myAgent.receive();
+
+
                 if (msg != null) {
 
                     String contenu = msg.getContent();
 
                     if (contenu.contains("Demande de")) {
 
-                        String consumerName = msg.getSender().getLocalName();
+                        String nomConsommateur = msg.getSender().getLocalName();
                         int energieDemandee = parseRequestedEnergy(contenu);
 
-                        demande.add(consumerName);
+                        demande.add(nomConsommateur);
                         demandeEnergie.add(energieDemandee);
 
-                        System.out.println("Demande reçu de " + consumerName + ": " + energieDemandee + " kWh");
+                        System.out.println("Demande reçu de " + nomConsommateur + ": " + energieDemandee + " kWh");
                         allouerEnergie();
 
                     } else if (contenu.startsWith("Energie disponible :")) {
@@ -55,8 +63,11 @@ public class UtilAgent extends Agent {
                 }
             }
 
-            //allocation de l'energie à chaque consommateur en fonction de sa demande
+            //fonction pour l'allocation de l'energie à chaque consommateur en fonction de sa demande
+            //si tot_supply > energie demandée
             private void allouerEnergie() {
+
+
                 if (tot_supply <= 0) {
                     System.out.println("Pas d'énergie disponible pour allocation.");
                     return;
@@ -66,20 +77,22 @@ public class UtilAgent extends Agent {
                     String consumer = demande.get(i);
                     int requestedEnergy = demandeEnergie.get(i);
 
-                    int allocatedEnergy = Math.min(requestedEnergy, tot_supply);
+                    int energieAlloue = Math.min(requestedEnergy, tot_supply);
 
-                    ACLMessage response = new ACLMessage(ACLMessage.INFORM);
-                    response.addReceiver(getAID(consumer));
-                    response.setContent("Allocation: " + allocatedEnergy + " kWh");
-                    send(response);
+                    //INFORM message pour récuperer la demande en énergie du consommateur
+                    ACLMessage rep = new ACLMessage(ACLMessage.INFORM);
+                    rep.addReceiver(getAID(consumer));
+                    //allocation selon la quantité d'énergie demandée (si disponible)
+                    rep.setContent("Allocation: " + energieAlloue + " kWh");
+                    send(rep);
 
-                    tot_supply -= allocatedEnergy;
+                    tot_supply -= energieAlloue;
 
-                    System.out.println("Alloué " + allocatedEnergy + " kWh à " + consumer);
+                    System.out.println("Alloué " + energieAlloue + " kwh à " + consumer);
                     System.out.println("Energie restante: " + tot_supply + " kWh");
 
                     if (tot_supply <= 0) {
-                        System.out.println("Pas d'énergie disponible.");
+                        System.out.println("Util n'a plus d'énergie disponible.");
                         break;
                     }
                 }
@@ -92,13 +105,14 @@ public class UtilAgent extends Agent {
                 }
             }
 
-            //extraction de energie demandé
-            private int parseRequestedEnergy(String content) {
+            //parsing requested energy
+            private int parseRequestedEnergy(String dem) {
                 try {
-                    String[] parts = content.split(" ");
-                    return Integer.parseInt(parts[2]); // "Demande de X kWh"
-                } catch (Exception e) {
-                    System.err.println("Erreur lors de l'analyse de la demande: " + content);
+                    String[] parts = dem.split(" ");
+                    return Integer.parseInt(parts[2]);
+                }
+                catch (Exception e) {
+                    System.err.println("Parsing error " + dem);
                     return 0;
                 }
             }
