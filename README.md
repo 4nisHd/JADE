@@ -18,7 +18,7 @@ This project implements a **multi-agent system** using **JADE** to optimize ener
    - Responds to allocation requests.
 
 ## Communication flow:
-![Communication](com.gif)
+![Communication](com.png)
 
      
 The system is scalable with modular design that supports adding more agents to simulate larger networks.
