@@ -1,4 +1,4 @@
-#A simple multi-agent system with JADE
+## A simple multi-agent system with JADE
 
 This project implements a **multi-agent system** using **JADE** for energy distribution among different components in a power grid. The system employs **Agent Communication Language (ACL)** for inter-agent communication.
 
